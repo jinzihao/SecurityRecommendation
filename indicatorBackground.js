@@ -10,10 +10,23 @@ hsts = "";
 hstsDict = [];
 xfo = "";
 xfoDict = [];
+insecureResource = 0;
+insecureResourceDict = [];
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.command === "collectHTTPData") {
+            sendResponse({"httpCSP": httpCSPDict[request.url], "HSTS": hstsDict[request.url], "XFO": xfoDict[request.url], "insecureResource": insecureResourceDict[request.url] ? 1 : 0});
+        }
+    }
+);
 
 chrome.webRequest.onHeadersReceived.addListener(function(details) {
     chrome.tabs.query({"highlighted": true}, function(tabs) {
         if (tabs.length === 1) {
+            if (details.url.split("://")[0] === "http" && details.initiator && details.initiator.split("://")[0] === "https") {
+                insecureResourceDict[tabs[0].url] = 1;
+            }
             if (tabs[0].url === details.url) {
                 csp_found = false;
                 hsts_found = false;
@@ -37,12 +50,3 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         }
     });
 }, networkFilters, ["responseHeaders"]);
-
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-        if (request.command === "collectHTTPData") {
-            sendResponse({"httpCSP": httpCSPDict[request.url], "HSTS": hstsDict[request.url], "XFO": xfoDict[request.url]});
-        }
-    }
-);
-

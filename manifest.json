@@ -1,0 +1,21 @@
+{
+  "name": "Web Security Indicator",
+  "description" : "Web Security Indicator",
+  "version": "1.0",
+  "browser_action": {
+    "default_popup": "indicator.html",
+    "default_icon": "indicator_extension.png"
+  },
+  "permissions": ["tabs", "storage", "webRequest", "<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["indicatorContentScript.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["indicatorBackground.js"],
+    "persistent": true
+  },
+  "manifest_version": 2
+}
